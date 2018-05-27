@@ -1,7 +1,7 @@
 ---
 home: true
-actionText: Get Started →
-actionLink: /guide/
+actionText: Demo →
+actionLink: /demo/
 features:
 - title: Read the Blog Post
   details: For a background on 
@@ -12,8 +12,3 @@ features:
   details: Send bugs
 footer: MIT Licensed | Copyright © 2018-present Servicios A0 SpA
 ---
-
-
-# On solving the timezone changes problem
-
-{{ 1 + 1 }}

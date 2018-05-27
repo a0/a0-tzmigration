@@ -7,10 +7,14 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "docs:dev": "vuepress dev docs",
-    "docs:build": "vuepress build docs"
+    "docs:dev": "mkdir -p docs/.vuepress/public && cp -r data docs/.vuepress/public && vuepress dev docs",
+    "docs:build": "mkdir -p docs/.vuepress/public && cp -r data docs/.vuepress/public && vuepress build docs"
   },
   "devDependencies": {
+    "axios": "^0.18.0",
+    "pug": "^2.0.3",
+    "pug-plain-loader": "^1.0.0",
+    "vis": "^4.21.0",
     "vuepress": "^0.9.0"
   }
 }

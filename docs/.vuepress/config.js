@@ -6,5 +6,5 @@ module.exports = {
       description: 'Solving the problem…'
     }
   },
-  base: '/a0-tzmigration-web'
+  base: '/a0-tzmigration-web/'
 }
