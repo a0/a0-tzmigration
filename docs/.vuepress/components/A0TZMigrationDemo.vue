@@ -51,7 +51,6 @@ import moment from 'moment'
 import 'vis/dist/vis.min.css'
 
 let tzversion = new TZVersion()
-window.m = moment
 
 export default {
   data() {
@@ -215,7 +214,6 @@ export default {
           this.draw_timeline(item)
           this.update_timeline_options()
           this.calculate_diff()
-          window.xxx = this
         })
       })
     },
