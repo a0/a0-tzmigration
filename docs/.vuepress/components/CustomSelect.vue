@@ -1,11 +1,11 @@
 <template lang="pug">
   div(v-if="items")
     label {{ label }}
-    button(v-if="updown" @click="up" :disabled="disabled_up") ↑
+    button(v-if="updown" @click="dn" :disabled="disabled_dn") ↓
     select(v-model="selected_value" @input="event => { $emit('input', event.target.value) }")
       option(:value="null" v-if="!updown")
       option(v-for="item in items") {{ item }}
-    button(v-if="updown" @click="dn" :disabled="disabled_dn") ↓
+    button(v-if="updown" @click="up" :disabled="disabled_up") ↑
 </template>
 
 <script>
