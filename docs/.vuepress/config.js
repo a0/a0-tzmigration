@@ -6,7 +6,7 @@ module.exports = {
       description: 'Utilities to help with migrations between timezone changes when they happen in the tzdata/zoneinfo/Olson database'
     }
   },
-  base: '/a0-tzmigration-web/',
+  base: '/a0-tzmigration/',
   themeConfig: {
     search: false
   }

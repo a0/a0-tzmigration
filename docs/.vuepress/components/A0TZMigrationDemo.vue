@@ -232,7 +232,7 @@ export default {
         this.timeline[item].setItems(items)
         this.timeline[item].setGroups(groups)
         this.timeline[item].setOptions(options)
-        console.log('fit!', item)
+        // console.log('fit!', item)
         this.timeline[item].fit()
       } else {
         this.timeline[item] = new vis.Timeline(elem, items, groups, options)
@@ -285,7 +285,7 @@ export default {
     },
     sync_range(item) {
       ['a', 'b', 'd'].filter(e => e !== item).forEach(tl => {
-        console.log('syncing range to', item)
+        // console.log('syncing range to', item)
         this.timeline[tl].setWindow(this.timeline[item].getWindow())
       })
     },
