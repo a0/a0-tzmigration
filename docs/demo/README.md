@@ -9,7 +9,7 @@ pageClass: demo
 
 **THIS SOFTWARE IS CURRENTLY IN BETA, USE WITH CAUTION, DOUBLE CHECK EVERYTHING**
 
-This UI allows you to see what changes must be applied to your system/database whenever a change occurs in the [tzdata/zoneinfo/Olson database](https://en.wikipedia.org/wiki/Tz_database).
+This UI allows to see what changes must be applied to your systems whenever a change occurs in the [tzdata/zoneinfo/Olson database](https://en.wikipedia.org/wiki/Tz_database).
 
 In order to do so, your system must adhere to the following rules:
 1. All timestamps must be stored in UTC/seconds since the epoch, leap seconds *ignored* (as UNIX does).
@@ -18,7 +18,7 @@ In order to do so, your system must adhere to the following rules:
 
 Given the above, Choose your current timezone/version on the left (ex: 'America/Santiago', '2016c') and then the new timezone/version on the right (ex: 'America/Santiago', '2017a'). You can choose any other zone, for example 'America/Punta_Arenas', '2017a'.
 
-You can share the URL, [Click here for the example above](#America/Santiago#2016c#America/Punta_Arenas#2017a#).
+You can share the URL, [Click here for the example above](?ta=America/Santiago&va=2016c&tb=America/Punta_Arenas&vb=2017a).
 
 Time in software is kind of a mess, so please take that into account. In particular, timestamps after 2037 are not really meaningful (yet!).
 

@@ -102,18 +102,21 @@ export default {
   },
   watch: {
     timezone_a() {
-      if (this.version.a == null) {
+      if (this.version.a == null && this.versions_a) {
         this.version.a = this.versions_a[1] || this.versions_a[0]
       }
 
       if (this.timezone.b == null) {
         this.timezone.b = this.timezone.a
-        this.version.b = this.versions_b[0]
       }
 
       this.load_timezone('a')
     },
     timezone_b() {
+      if (this.version.b == null && this.versions_b) {
+        this.version.b = this.versions_b[0]
+      }
+
       this.load_timezone('b')
     },
     version_a() {
@@ -129,14 +132,10 @@ export default {
     '$route': {
       immediate: true,
       handler() {
-        console.log('route!', this.$route.hash)
-        if (this.$route.hash) {
-          let [_, zone_a, version_a, zone_b, version_b] = this.$route.hash.split('#')
-          if (zone_a) { this.timezone.a = zone_a }
-          if (zone_b) { this.timezone.b = zone_b }
-          if (version_a) { this.version.a = version_a }
-          if (version_b) { this.version.b = version_b }
-        }
+        if (this.$route.query.ta) { this.timezone.a = this.$route.query.ta }
+        if (this.$route.query.tb) { this.timezone.b = this.$route.query.tb }
+        if (this.$route.query.va) { this.version.a = this.$route.query.va }
+        if (this.$route.query.vb) { this.version.b = this.$route.query.vb }
       }
     }
   },
@@ -277,10 +276,8 @@ export default {
       }
     },
     update_history() {
-      console.log('updating history!')
-      if (window && window.history && this.timezone.a && this.timezone.b && this.version.a && this.version.b) {
-        console.log('updating history! here')
-        history.replaceState({}, '', `#${this.timezone.a}#${this.version.a}#${this.timezone.b}#${this.version.b}#`)
+      if (this.timezone.a && this.timezone.b && this.version.a && this.version.b) {
+        this.$router.replace({ query: { ta: this.timezone_a, va: this.version_a, tb: this.timezone_b, vb: this.version_b } })
       }
     },
     date_from_time(time, min, max) {
