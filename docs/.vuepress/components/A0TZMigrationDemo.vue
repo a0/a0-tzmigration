@@ -5,42 +5,52 @@
         div.col
           CustomSelect(:items="timezone_names" v-model="timezone.a" label="First Zone")
           CustomSelect(:items="versions_a" v-model="version.a" label="Version" updown="x")
-          div.item
-            label &nbsp;
-            button(@click="copy") use same timezone →
+        div.col
+          div
+            label copy
+            button(@click="copy") same timezone →
+          div
+            label mode
+            button(@click="set_mode('timeline')" :disabled="mode == 'timeline'") timeline
+            button(@click="set_mode('table')" :disabled="mode == 'table'") table
         div.col
           CustomSelect(:items="timezone_names" v-model="timezone.b" label="Second Zone")
           CustomSelect(:items="versions_b" v-model="version.b" label="Version" updown="x")
       template(v-else)
-        | Loading…
-    div.row.text-left
-      b(v-if="loading.a") Loading A …
-      b(v-else) {{ info.name.a }} {{ version.a }}
-      small {{ this.info.items.a.length }} transitions
-    div.text-left
-      button(:disabled="prev_select_disabled('a')" @click="select_prev('a')") ⇤ Prev
-      button(:disabled="fit_disabled('a')" @click="fit('a')") FIT
-      button(:disabled="next_select_disabled('a')" @click="select_next('a')") Next ⇥
-    div(ref="timeline_a")
-    div.row.text-center
-      b(v-if="loading.a || loading.b") …
-      b(v-else-if="info.items.d.length == 0") NO Changes (A → B)
-      b(v-else-if="info.items.d.length == 1") 1 Change (A → B)
-      b(v-else) {{ info.items.d.length }} Changes (A → B)
-    div.text-center
-      button(:disabled="prev_select_disabled('d')" @click="select_prev('d')") ⇤ Prev
-      button(:disabled="fit_disabled('d')" @click="fit('d')") FIT
-      button(:disabled="next_select_disabled('d')" @click="select_next('d')") Next ⇥
-    div(ref="timeline_d")
-    div.row.text-right
-      b(v-if="loading.b") Loading B …
-      b(v-else) {{ info.name.b }} {{ version.b }}
-      small {{ this.info.items.b.length }} transitions
-    div.text-right
-      button(:disabled="prev_select_disabled('b')" @click="select_prev('b')") ⇤ Prev
-      button(:disabled="fit_disabled('b')" @click="fit('b')") FIT
-      button(:disabled="next_select_disabled('b')" @click="select_next('b')") Next ⇥
-    div(ref="timeline_b")
+        | Loading indexes…
+    div(v-show="mode == 'timeline'")
+      div.row.text-left
+        b(v-if="loading.a") Loading A …
+        b(v-else) {{ info.name.a }} {{ version.a }}
+        small {{ transitions_text_a }}
+      div.text-left
+        button(:disabled="prev_select_disabled('a')" @click="select_prev('a')") ⇤ Prev
+        button(:disabled="fit_disabled('a')" @click="fit('a')") FIT
+        button(:disabled="next_select_disabled('a')" @click="select_next('a')") Next ⇥
+      div(ref="timeline_a")
+      div.row.text-center
+        b {{ changes_text }}
+      div.text-center
+        button(:disabled="prev_select_disabled('d')" @click="select_prev('d')") ⇤ Prev
+        button(:disabled="fit_disabled('d')" @click="fit('d')") FIT
+        button(:disabled="next_select_disabled('d')" @click="select_next('d')") Next ⇥
+      div(ref="timeline_d")
+      div.row.text-right
+        b(v-if="loading.b") Loading B …
+        b(v-else) {{ info.name.b }} {{ version.b }}
+        small {{ transitions_text_b }}
+      div.text-right
+        button(:disabled="prev_select_disabled('b')" @click="select_prev('b')") ⇤ Prev
+        button(:disabled="fit_disabled('b')" @click="fit('b')") FIT
+        button(:disabled="next_select_disabled('b')" @click="select_next('b')") Next ⇥
+      div(ref="timeline_b")
+    div.parent(v-show="mode == 'table'")
+      div.col
+        TableTimezone(:info="info" :transitions_text="transitions_text_a" :timezone_text="`${info.name.a} ${version.a}`")
+      div.col
+        TableChanges(:info="info" :changes_text="changes_text")
+      div.col
+        TableTimezone(:info="info" :transitions_text="transitions_text_b" :timezone_text="`${info.name.b} ${version.b}`")
 </template>
 
 <script>
@@ -49,10 +59,12 @@ import axios from 'axios'
 import vis from 'vis'
 import moment from 'moment'
 import 'vis/dist/vis.min.css'
+import Common from './Common'
 
 let tzversion = new TZVersion()
 
 export default {
+  extends: Common,
   data() {
     return {
       timezone: { a: null, b: null },
@@ -69,7 +81,8 @@ export default {
       },
       loading: { a: null, b: null, d: null },
       timezones: null,
-      timezone_names: null
+      timezone_names: null,
+      mode: 'timeline'
     }
   },
   mounted() {
@@ -77,6 +90,7 @@ export default {
       this.timezones = data
       this.timezone_names = Object.keys(this.timezones).slice().sort()
     })
+    window.x = this
   },
   computed: {
     versions_a() {
@@ -98,6 +112,31 @@ export default {
     },
     version_b() {
       return this.version.b
+    },
+    changes_text() {
+      if (this.loading.a || this.loading.b) {
+        return '…'
+      } else if (this.info.items.d.length == 0) {
+        return 'NO Changes (A → B)'
+      } else if (this.info.items.d.length == 1) {
+        return '1 Change (A → B)'
+      } else {
+        return `${this.info.items.d.length} Changes (A → B)`
+      }
+    },
+    transitions_text_a() {
+      if (this.info.items.a.length == 1) {
+        return '1 transition'
+      } else {
+        return `${this.info.items.a.length} transitions`
+      }
+    },
+    transitions_text_b() {
+      if (this.info.items.b.length == 1) {
+        return '1 transition'
+      } else {
+        return `${this.info.items.b.length} transitions`
+      }
     }
   },
   watch: {
@@ -136,19 +175,19 @@ export default {
         if (this.$route.query.tb) { this.timezone.b = this.$route.query.tb }
         if (this.$route.query.va) { this.version.a = this.$route.query.va }
         if (this.$route.query.vb) { this.version.b = this.$route.query.vb }
+        if (this.$route.query.m) { this.mode = this.$route.query.m }
       }
+    },
+    mode() {
+      this.update_history()
     }
   },
   methods: {
+    set_mode(mode) {
+      this.mode = mode
+    },
     copy() {
       this.$set(this.timezone, 'b', this.timezone.a)
-    },
-    offset_to_str(offset) {
-      let date = new Date(null)
-      let off = offset < 0 ? -offset : offset
-      let pre = offset < 0 ? '-' : '+'
-      date.setTime(off*1000)
-      return pre + date.toISOString().substr(11, 8)
     },
     min(a, b) {
       if (a == null) {
@@ -277,7 +316,7 @@ export default {
     },
     update_history() {
       if (this.timezone.a && this.timezone.b && this.version.a && this.version.b) {
-        this.$router.replace({ query: { ta: this.timezone_a, va: this.version_a, tb: this.timezone_b, vb: this.version_b } })
+        this.$router.replace({ query: { ta: this.timezone_a, va: this.version_a, tb: this.timezone_b, vb: this.version_b, m: this.mode } })
       }
     },
     date_from_time(time, min, max) {
@@ -321,9 +360,11 @@ export default {
 
         let str_offset = this.offset_to_str(item.off)
         offsets[str_offset] = { id: item.off, content: str_offset }
-        let title = `<small><b>${this.date_str_from_time(item.ini)}</b> ≤ <b>t</b> < <b>${this.date_str_from_time(item.fin)}</b></small><b>${str_offset}</b>`
+        let start_str = this.date_str_from_time(item.ini)
+        let end_str = this.date_str_from_time(item.fin)
+        let title = `<small><b>${start_str}</b> ≤ <b>t</b> < <b>${end_str}</b></small><b>${str_offset}</b>`
 
-        return { id: index, group: item.off, content: str_offset, title: title, start: start, end: end }
+        return { id: index, group: item.off, content: str_offset, title: title, start: start, end: end, start_str: start_str, end_str: end_str }
       })
 
       let groups = this.info.groups.d = new vis.DataSet()
@@ -383,7 +424,7 @@ label {
   text-align: center;
 }
 div.item {
-  /* border: 1px solid red; */
+  border: 1px solid red;
   flex-grow: 1;
   justify-content: center;
 }
@@ -406,6 +447,12 @@ div.col {
 }
 .text-right {
   text-align: right;
+}
+.block {
+  display: block;
+}
+table {
+  font-size: 14px;
 }
 </style>
 
