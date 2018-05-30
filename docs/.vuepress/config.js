@@ -9,5 +9,6 @@ module.exports = {
   base: '/a0-tzmigration/',
   themeConfig: {
     search: false
-  }
+  },
+  ga: 'UA-97543933-4'
 }
