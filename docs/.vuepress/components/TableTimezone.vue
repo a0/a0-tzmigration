@@ -3,7 +3,7 @@
     tr
       th(colspan="4")
         button(@click="generate_csv") download csv
-        | {{ timezone_text }}
+        template(v-if="info.name[item]") {{ timezone_text }}
         small {{ transitions_text }}
     tr
       th local time

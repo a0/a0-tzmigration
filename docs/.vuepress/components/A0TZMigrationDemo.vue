@@ -12,7 +12,7 @@
           div
             label mode
             button(@click="set_mode('timeline')" :disabled="mode == 'timeline'") timeline
-            button(@click="set_mode('table')" :disabled="mode == 'table'") table
+            button(@click="set_mode('table')" :disabled="mode == 'table'") data
         div.col
           CustomSelect(:items="timezone_names" v-model="timezone.b" label="Second Zone")
           CustomSelect(:items="versions_b" v-model="version.b" label="Version" updown="x")
