@@ -25,14 +25,18 @@
         small {{ transitions_text_a }}
       div.text-left
         button(:disabled="prev_select_disabled('a')" @click="select_prev('a')") ⇤ Prev
+        button(:disabled="zoom_in_disabled('a')" @click="zoom_in('a')") Zoom in
         button(:disabled="fit_disabled('a')" @click="fit('a')") FIT
+        button(:disabled="zoom_out_disabled('a')" @click="zoom_out('a')") Zoom out
         button(:disabled="next_select_disabled('a')" @click="select_next('a')") Next ⇥
       div(ref="timeline_a")
       div.row.text-center
         b {{ changes_text }}
       div.text-center
         button(:disabled="prev_select_disabled('d')" @click="select_prev('d')") ⇤ Prev
+        button(:disabled="zoom_in_disabled('d')" @click="zoom_in('d')") Zoom in
         button(:disabled="fit_disabled('d')" @click="fit('d')") FIT
+        button(:disabled="zoom_out_disabled('d')" @click="zoom_out('d')") Zoom out
         button(:disabled="next_select_disabled('d')" @click="select_next('d')") Next ⇥
       div(ref="timeline_d")
       div.row.text-right
@@ -41,7 +45,9 @@
         small {{ transitions_text_b }}
       div.text-right
         button(:disabled="prev_select_disabled('b')" @click="select_prev('b')") ⇤ Prev
+        button(:disabled="zoom_in_disabled('b')" @click="zoom_in('b')") Zoom in
         button(:disabled="fit_disabled('b')" @click="fit('b')") FIT
+        button(:disabled="zoom_out_disabled('b')" @click="zoom_out('b')") Zoom out
         button(:disabled="next_select_disabled('b')" @click="select_next('b')") Next ⇥
       div(ref="timeline_b")
     div.parent(v-show="mode == 'table'")
@@ -83,7 +89,8 @@ export default {
       loading: { a: null, b: null, d: null },
       timezones: null,
       timezone_names: null,
-      mode: 'timeline'
+      mode: 'timeline',
+      do_sync: false
     }
   },
   mounted() {
@@ -289,7 +296,7 @@ export default {
         this.timeline[item].fit()
       } else {
         this.timeline[item] = new vis.Timeline(elem, items, groups, options)
-        this.timeline[item].on('rangechanged', (props) => { if (item == 'd' || props.byUser) { this.sync_range(item) } })
+        this.timeline[item].on('rangechanged', (props) => { if (this.do_sync || props.byUser) { this.sync_range(item) } })
         this.timeline[item].on('select', (props) => { this.sync_range(item) })
       }
       // this.timeline[item] && this.timeline[item].destroy()
@@ -346,6 +353,7 @@ export default {
         // console.log('syncing range to', item)
         this.timeline[tl].setWindow(this.timeline[item].getWindow())
       })
+      this.do_sync = false
     },
     calculate_diff() {
       if (!this.info.data.a || !this.info.data.b) {
@@ -387,18 +395,20 @@ export default {
     },
     fit(item) {
       this.timeline[item].fit()
+      this.do_sync = true
     },
     select_prev(item) {
       let selected = this.timeline[item].getSelection()[0] - 1 || 0
       selected = selected < 0 ? 0 : selected
       this.timeline[item].setSelection([selected], { focus: true })
-
+      this.do_sync = true
     },
     select_next(item) {
       let length = this.info.items[item].length
       let selected = this.timeline[item].getSelection()[0] + 1 || length - 1
       selected = selected >= length ? length - 1 : selected
       this.timeline[item].setSelection([selected], { focus: true })
+      this.do_sync = true
     },
     fit_disabled(item) {
       return this.timeline[item] == null || this.info.items[item].length == 0
@@ -408,6 +418,20 @@ export default {
     },
     next_select_disabled(item) {
       return this.timeline[item] == null || this.info.items[item].length == 0
+    },
+    zoom_in_disabled(item) {
+      return this.timeline[item] == null
+    },
+    zoom_out_disabled(item) {
+      return this.timeline[item] == null
+    },
+    zoom_in(item) {
+      this.timeline[item] && this.timeline[item].zoomIn(1)
+      this.do_sync = true
+    },
+    zoom_out(item) {
+      this.timeline[item] && this.timeline[item].zoomOut(1)
+      this.do_sync = true
     }
   }
 }
