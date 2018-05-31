@@ -46,11 +46,11 @@
       div(ref="timeline_b")
     div.parent(v-show="mode == 'table'")
       div.col
-        TableTimezone(:info="info" :transitions_text="transitions_text_a" :timezone_text="`${info.name.a} ${version.a}`")
+        TableTimezone(:info="info" item="a" :transitions_text="transitions_text_a" :timezone_text="`${info.name.a} ${version.a}`")
       div.col
         TableChanges(:info="info" :changes_text="changes_text")
       div.col
-        TableTimezone(:info="info" :transitions_text="transitions_text_b" :timezone_text="`${info.name.b} ${version.b}`")
+        TableTimezone(:info="info" item="b" :transitions_text="transitions_text_b" :timezone_text="`${info.name.b} ${version.b}`")
 </template>
 
 <script>
@@ -73,6 +73,7 @@ export default {
       info: {
         data: { a: null, b: null },
         name: { a: null, b: null },
+        version: { a: null, b: null },
         utc_min: { a: null, b: null },
         utc_max: { a: null, b: null },
         items: { a: [], b: [], d: [] },
@@ -214,9 +215,11 @@ export default {
       this.info.utc_max[item] = null
       this.$nextTick(() => {
         let timezone_name = this.timezone[item]
+        let version = this.version[item]
         tzversion.fetch(this.timezone[item], this.version[item]).then(data => {
           this.info.data[item] = data
           this.info.name[item] = timezone_name
+          this.info.version[item] = version
           // console.log(data)
           let offsets = {}
           let items = data.transitions.map((elem, index) => {
@@ -364,7 +367,7 @@ export default {
         let end_str = this.date_str_from_time(item.fin)
         let title = `<small><b>${start_str}</b> ≤ <b>t</b> < <b>${end_str}</b></small><b>${str_offset}</b>`
 
-        return { id: index, group: item.off, content: str_offset, title: title, start: start, end: end, start_str: start_str, end_str: end_str }
+        return { id: index, group: item.off, content: str_offset, title: title, start: start, end: end, start_str: start_str, end_str: end_str, ini: item.ini, fin: item.fin }
       })
 
       let groups = this.info.groups.d = new vis.DataSet()
