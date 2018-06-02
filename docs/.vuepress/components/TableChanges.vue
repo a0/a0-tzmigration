@@ -10,8 +10,8 @@
       th end
       th apply offset
     tr(v-for="item in info.items.d")
-      td {{ item.start_str }}
-      td {{ item.end_str }}
+      td {{ item.ini_str }}
+      td {{ item.fin_str }}
       td {{ item.content }}
 </template>
 
@@ -27,9 +27,9 @@ export default {
 
       content.push(`start timezone:,${this.info.name.a},start version:,${this.info.version.a}, ,final timezone:,${this.info.name.b},final version:,${this.info.version.b}`)
       content.push(`apply query start <= t < end`)
-      content.push(`start unix timestamp,end unix timestamp,change [seconds],start date,end date,change`)
+      content.push(`ini unix timestamp,fin unix timestamp,change [seconds],ini date,fin date,change`)
       this.info.items.d.forEach(item => {
-        content.push([item.ini, item.fin, item.group, item.start_str, item.end_str, item.content])
+        content.push([item.ini, item.fin, item.group, item.ini_str, item.fin_str, item.content])
       });
 
       window.open(encodeURI(content.join('\n')))

@@ -67,8 +67,6 @@ import moment from 'moment'
 import 'vis/dist/vis.min.css'
 import Common from './Common'
 
-let tzversion = new TZVersion()
-
 export default {
   extends: Common,
   data() {
@@ -77,9 +75,10 @@ export default {
       version: { a: null, b: null },
       timeline: { a: null, b: null, d: null },
       info: {
-        data: { a: null, b: null },
         name: { a: null, b: null },
         version: { a: null, b: null },
+        tzversion: { a: null, b: null },
+        transitions: { a: null, b: null },
         utc_min: { a: null, b: null },
         utc_max: { a: null, b: null },
         items: { a: [], b: [], d: [] },
@@ -94,11 +93,10 @@ export default {
     }
   },
   mounted() {
-    tzversion.timezones().then(data => {
+    TZVersion.timezones().then(data => {
       this.timezones = data
       this.timezone_names = Object.keys(this.timezones).slice().sort()
     })
-    window.x = this
   },
   computed: {
     versions_a() {
@@ -216,67 +214,58 @@ export default {
       return (a > b) ? a : b
     },
     load_timezone(item) {
-      // console.log('item', item)
       this.loading[item] = true
-      this.info.utc_min[item] = null
-      this.info.utc_max[item] = null
-      this.$nextTick(() => {
-        let timezone_name = this.timezone[item]
-        let version = this.version[item]
-        tzversion.fetch(this.timezone[item], this.version[item]).then(data => {
-          this.info.data[item] = data
-          this.info.name[item] = timezone_name
-          this.info.version[item] = version
-          // console.log(data)
-          let offsets = {}
-          let items = data.transitions.map((elem, index) => {
-            let utc_timestamp = elem['utc_timestamp']
-            let utc_offset = elem['utc_offset']
-            let str_offset = this.offset_to_str(utc_offset)
-            offsets[str_offset] = { id: utc_offset, content: str_offset }
+      this.$nextTick(async () => {
+        this.info.utc_min[item] = null
+        this.info.utc_max[item] = null
+        let name = this.info.name[item] = this.timezone[item]
+        let version = this.info.version[item] = this.version[item]
 
-            let title = '<b>' + str_offset + '</b>'
-            title += '<small>local:</small>'
-            title += '<small>' + elem['local_ini_str'] + '</small>'
-            title += '<small>' + elem['local_fin_str'] + '</small>'
+        let tzversion = this.info.tzversion[item] = new TZVersion(name, version)
+        let transitions = this.info.transitions[item] = await tzversion.transitions()
 
-            this.info.utc_min[item] = this.min(utc_timestamp, this.info.utc_min[item])
-            this.info.utc_max[item] = this.max(utc_timestamp, this.info.utc_max[item])
-            // console.log(item, 'min', JSON.parse(JSON.stringify(this.info.utc_min)), 'max', JSON.parse(JSON.stringify(this.info.utc_max)))
+        let offsets = {}
+        let items = this.info.items[item] = transitions.map((elem, index) => {
+          let utc_timestamp = elem['utc_timestamp']
+          let utc_offset = elem['utc_offset']
+          let str_offset = this.offset_to_str(utc_offset)
+          offsets[str_offset] = { id: utc_offset, content: str_offset }
 
-            return { id: index, group: utc_offset, content: '', title: title, start: elem['utc_time'] }
-          });
-          this.info.items[item] = items
-          // console.log(items)
-          
-          let groups = this.info.groups[item] = new vis.DataSet()
-          // console.log('offsets', offsets)
-          Object.values(offsets).forEach((value) => {
-            // console.log('adding to group', value)
-            groups.add(value)
-          })
+          let title = '<b>' + str_offset + '</b>'
+          title += '<small>local:</small>'
+          title += '<small>' + elem['local_ini_str'] + '</small>'
+          title += '<small>' + elem['local_fin_str'] + '</small>'
 
-          let min_utc = this.min(this.info.utc_min.a, this.info.utc_min.b) - 86400*30
-          let max_utc = this.max(this.info.utc_max.a, this.info.utc_max.b) + 86400*30
-          let min_date = new Date()
-          let max_date = new Date()
-          min_date.setTime(min_utc*1000)
-          max_date.setTime(max_utc*1000)
+          this.info.utc_min[item] = this.min(utc_timestamp, this.info.utc_min[item])
+          this.info.utc_max[item] = this.max(utc_timestamp, this.info.utc_max[item])
 
-          this.info.options[item] = {
-            groupOrder: 'id',
-            min: min_date,
-            max: max_date,
-            moment: function (date) {
-              return vis.moment(date).utc();
-            }
-          }
-
-          this.draw_timeline(item)
-          this.update_timeline_options()
-          this.calculate_diff()
-          this.update_history()
+          return { id: index, group: utc_offset, content: '', title: title, start: elem['utc_time'] }
         })
+
+        let groups = this.info.groups[item] = new vis.DataSet()
+        Object.values(offsets).forEach((value) => {
+          groups.add(value)
+        })
+        let min_utc = this.min(this.info.utc_min.a, this.info.utc_min.b) - 86400*30
+        let max_utc = this.max(this.info.utc_max.a, this.info.utc_max.b) + 86400*30
+        let min_date = new Date()
+        let max_date = new Date()
+        min_date.setTime(min_utc*1000)
+        max_date.setTime(max_utc*1000)
+
+        this.info.options[item] = {
+          groupOrder: 'id',
+          min: min_date,
+          max: max_date,
+          moment: function (date) {
+            return vis.moment(date).utc();
+          }
+        }
+
+        this.draw_timeline(item)
+        this.update_timeline_options()
+        this.calculate_diff()
+        this.update_history()
       })
     },
     draw_timeline(item) {
@@ -284,15 +273,10 @@ export default {
       let items = this.info.items[item]
       let options = this.info.options[item]
       let groups = this.info.groups[item]
-      // console.log('drawing', item, 'items', this)
-      // console.log('items', items)
-      // console.log('options', items, options)
-      // console.log('groups', items, groups)
       if (this.timeline[item]) {
         this.timeline[item].setItems(items)
         this.timeline[item].setGroups(groups)
         this.timeline[item].setOptions(options)
-        // console.log('fit!', item)
         this.timeline[item].fit()
       } else {
         this.timeline[item] = new vis.Timeline(elem, items, groups, options)
@@ -309,7 +293,6 @@ export default {
         this.info.options.a.max = this.max(this.info.options.a.max, this.info.options.b.max)
         let nnn = JSON.stringify(this.info.options.a)
         if (ooo != nnn) {
-          // console.log('updating options for a', JSON.parse(ooo), JSON.parse(nnn))
           this.timeline.a.setOptions(this.info.options.a)
         }
       }
@@ -319,7 +302,6 @@ export default {
         this.info.options.b.max = this.max(this.info.options.a.max, this.info.options.b.max)
         let nnn = JSON.stringify(this.info.options.b)
         if (ooo != nnn) {
-          // console.log('updating options for b', JSON.parse(ooo), JSON.parse(nnn))
           this.timeline.b.setOptions(this.info.options.b)
         }
       }
@@ -338,60 +320,50 @@ export default {
         return moment(time * 1000)
       }
     },
-    date_str_from_time(time) {
-      if (time == -Infinity) {
-        return '-∞'
-      } else if (time == Infinity) {
-        return '∞'
-      } else {
-
-        return this.date_from_time(time).utc().format('YYYY-MM-DD HH:mm:SS UTC')
-      }
-    },
     sync_range(item) {
       ['a', 'b', 'd'].filter(e => e !== item).forEach(tl => {
-        // console.log('syncing range to', item)
         this.timeline[tl].setWindow(this.timeline[item].getWindow())
       })
       this.do_sync = false
     },
     calculate_diff() {
-      if (!this.info.data.a || !this.info.data.b) {
+      if (!this.info.transitions.a || !this.info.transitions.b) {
         return
       }
 
-      let offsets = {}
-      let min = this.min(this.info.options.a.min, this.info.options.b.min)
-      let max = this.max(this.info.options.a.max, this.info.options.b.max)
-      let delta = tzversion.delta_ranges(this.info.data.a, this.info.data.b)
-      this.info.items.d = delta.map((item, index) => {
+      // console.log('calculating diff for', this.info.transitions.a, this.info.transitions.b)
 
-        let start = this.date_from_time(item.ini, min, max)
-        let end = this.date_from_time(item.fin, min, max)
+      this.$nextTick(async () => {
+        let offsets = {}
+        let min = this.min(this.info.options.a.min, this.info.options.b.min)
+        let max = this.max(this.info.options.a.max, this.info.options.b.max)
+        let changes = await this.info.tzversion.a.changes(this.info.tzversion.b)
+        this.info.items.d = changes.map((item, index) => {
+          let start = this.date_from_time(item.ini, min, max)
+          let end = this.date_from_time(item.fin, min, max)
 
-        let str_offset = this.offset_to_str(item.off)
-        offsets[str_offset] = { id: item.off, content: str_offset }
-        let start_str = this.date_str_from_time(item.ini)
-        let end_str = this.date_str_from_time(item.fin)
-        let title = `<small><b>${start_str}</b> ≤ <b>t</b> < <b>${end_str}</b></small><b>${str_offset}</b>`
+          let str_offset = this.offset_to_str(item.off)
+          offsets[str_offset] = { id: item.off, content: str_offset }
+          let title = `<small><b>${item.ini_str}</b> ≤ <b>t</b> < <b>${item.fin_str}</b></small><b>${str_offset}</b>`
 
-        return { id: index, group: item.off, content: str_offset, title: title, start: start, end: end, start_str: start_str, end_str: end_str, ini: item.ini, fin: item.fin }
-      })
+          return { id: index, group: item.off, content: str_offset, title: title, start: start, end: end, ini_str: item.ini_str, fin_str: item.fin_str, ini: item.ini, fin: item.fin }
+        })
 
-      let groups = this.info.groups.d = new vis.DataSet()
-      Object.values(offsets).forEach((value) => {
-        groups.add(value)
-      })
+        let groups = this.info.groups.d = new vis.DataSet()
+        Object.values(offsets).forEach((value) => {
+          groups.add(value)
+        })
 
-      this.info.options.d = {
-        groupOrder: 'id',
-        min: min,
-        max: max,
-        moment: function (date) {
-          return vis.moment(date).utc();
+        this.info.options.d = {
+          groupOrder: 'id',
+          min: min,
+          max: max,
+          moment: function (date) {
+            return vis.moment(date).utc();
+          }
         }
-      }
-      this.draw_timeline('d')
+        this.draw_timeline('d')
+      })
     },
     fit(item) {
       this.timeline[item].fit()

@@ -180,11 +180,12 @@
     "@webassemblyjs/wast-parser" "1.5.8"
     long "^3.2.0"
 
-a0-tzmigration-js@^0.1.1:
-  version "0.1.1"
-  resolved "https://registry.npmjs.org/a0-tzmigration-js/-/a0-tzmigration-js-0.1.1.tgz#1815f214def4817890e9f57fd0ae382bc92b632f"
+a0-tzmigration-js@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.npmjs.org/a0-tzmigration-js/-/a0-tzmigration-js-1.0.1.tgz#86585083966530f0edd1a4f40c5461730d586200"
   dependencies:
     axios "^0.18.0"
+    regenerator-runtime "^0.11.1"
 
 abbrev@1:
   version "1.1.1"
@@ -4731,7 +4732,7 @@ regenerate@^1.2.1:
   version "1.4.0"
   resolved "https://registry.npmjs.org/regenerate/-/regenerate-1.4.0.tgz#4a856ec4b56e4077c557589cae85e7a4c8869a11"
 
-regenerator-runtime@^0.11.0:
+regenerator-runtime@^0.11.0, regenerator-runtime@^0.11.1:
   version "0.11.1"
   resolved "https://registry.npmjs.org/regenerator-runtime/-/regenerator-runtime-0.11.1.tgz#be05ad7f9bf7d22e056f9726cee5017fbf19e2e9"
 

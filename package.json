@@ -1,8 +1,8 @@
 {
-  "name": "a0-tzmigrate-web",
+  "name": "a0-tzmigrate",
   "version": "1.0.0",
   "description": "Demo of A0::TZMigrate",
-  "repository": "https://github.com/aldrinmartoq/a0-tzmigrate-web",
+  "repository": "https://github.com/aldrinmartoq/a0-tzmigrate",
   "author": "Aldrin Martoq",
   "license": "MIT",
   "private": true,
@@ -11,7 +11,7 @@
     "docs:build": "vuepress build docs"
   },
   "devDependencies": {
-    "a0-tzmigration-js": "^0.1.1",
+    "a0-tzmigration-js": "^1.0.1",
     "moment": "^2.22.1",
     "pug": "^2.0.3",
     "pug-plain-loader": "^1.0.0",

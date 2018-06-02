@@ -9,8 +9,8 @@
       th local time
       th offset
       th previous
-    template(v-if="info.data[item]")
-      tr(v-for="transition in info.data[item].transitions")
+    template(v-if="info.transitions[item]")
+      tr(v-for="transition in info.transitions[item]")
         td
           .block ini: {{ transition.local_ini_str }}
           .block fin: {{ transition.local_fin_str }}
@@ -33,7 +33,7 @@ export default {
 
       content.push(`timezone:,${this.info.name[this.item]},version:,${this.info.version[this.item]}`)
       content.push(`local time ini,local time fin,offset,previous offset`)
-      this.info.data[this.item].transitions.forEach(transition => {
+      this.info.transitions[this.item].forEach(transition => {
         content.push([transition.local_ini_str, transition.fin_ini_str, this.offset_to_str(transition.utc_offset), this.offset_to_str(transition.utc_prev_offset)])
       });
 

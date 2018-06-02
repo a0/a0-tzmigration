@@ -9,7 +9,7 @@ pageClass: demo
 
 **THIS SOFTWARE IS CURRENTLY IN BETA, USE WITH CAUTION, DOUBLE CHECK EVERYTHING**
 
-This UI allows to see what changes must be applied to your systems whenever a change occurs in the [tzdata/zoneinfo/Olson database](https://en.wikipedia.org/wiki/Tz_database).
+This UI allows to see what changes must be applied to your systems whenever a change occurs in the [tzdb/zoneinfo/Olson database](https://en.wikipedia.org/wiki/Tz_database).
 
 In order to do so, your system must adhere to the following rules:
 1. All timestamps must be stored in UTC/seconds since the epoch, leap seconds *ignored* (as UNIX does).
