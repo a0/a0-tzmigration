@@ -32,10 +32,11 @@ module.exports = {
         link: '/data/'
       }
     ],
-    repo: 'a0/a0-tzmigration',
+    docsRepo: 'a0/a0-tzmigration',
     docsDir: 'docs',
     editLinks: true,
-    editLinkText: 'Help us improve this page'
+    editLinkText: 'Help us improve this page',
+    lastUpdated: 'updated'
 },
   ga: 'UA-97543933-4'
 }
