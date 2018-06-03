@@ -15,12 +15,17 @@ module.exports = {
         link: '/demo/'
       },
       {
-        text: 'Ruby gem',
-        link: '/api/ruby/'
-      },
-      {
-        text: 'JS npm',
-        link: '/api/js/'
+        text: 'API',
+        items: [
+          {
+            text: 'Ruby gem',
+            link: '/api/ruby/'
+          },
+          {
+            text: 'JS npm',
+            link: '/api/js/'
+          }
+        ]
       },
       {
         text: 'About the Repo',

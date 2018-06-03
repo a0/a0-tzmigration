@@ -33,7 +33,7 @@ function json2table(json) {
 
   return {
     [ValueViewerSymbol]: {
-        title: "JSON 2 TABLE",
+        title: "JSON2TABLE",
         HTML: html
     }
   }

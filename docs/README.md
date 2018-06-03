@@ -9,18 +9,19 @@ footer: MIT Licensed | Copyright © 2018 Servicios A0 SpA
 
 Whenever a new [Time Zone Database](https://www.iana.org/time-zones) is released it could mean a huge pain for you and your users. This utilities allow you to get the ranges of affected dates when that happens; so your system may automatically migrate that data or ask your users what is the right thing to do.
 
+# Implementing this in your own software
 
-# Integrating this in your own software
+Please read the full documentation for your language:
+- the [a0-tzmigration-ruby gem](./api/ruby/), for Ruby.
+- the [a0-tzmigration-js package](./api/js/), for JavaScript.
 
-There are currently packages for [ruby](./api/ruby/) and [javascript](./api/js/), all of them fetch the latest tzdb versions from our [repository](https://a0.github.io/a0-tzmigration-ruby/data/) to calculate the changes.
-
-You can calculate changes between any *(timezone, version)*, not only consecutive transitions. This could be useful when users change their timezone. For ex:
-*(America/Santiago, 2015a)* → *(America/Punta_Arenas, 2018e)*.
+And this important thing:
+- the format of our [tzdb version repository](./data/), from which each package gets the data to calculate changes between tzdb releases.
 
 
 # Try it!
 
-Use our [Demo](./demo/) app, or modify the code below for calling the javascript API.
+Use our [Demo](./demo/) app, or just play with the javascript package here in your browser:
 
 <ClientOnly><A0TZMigrationTry/></ClientOnly>
 
