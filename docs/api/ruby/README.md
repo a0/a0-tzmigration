@@ -43,20 +43,20 @@ require 'a0-tzmigration-ruby'
 version_a = A0::TZMigration::TZVersion.new('America/Santiago', '2014j')
 version_b = A0::TZMigration::TZVersion.new('America/Santiago', '2015a')
 
-puts version_a.changes(version_b)
+version_a.changes(version_b)
 # =>
-[ {:ini_str=>"2015-04-26 03:00:00 UTC", :fin_str=>"2015-09-06 04:00:00 UTC", :off_str=>"+01:00:00", :ini=>1430017200, :fin=>1441512000, :off=>3600},
-  {:ini_str=>"2016-04-24 03:00:00 UTC", :fin_str=>"2016-09-04 04:00:00 UTC", :off_str=>"+01:00:00", :ini=>1461466800, :fin=>1472961600, :off=>3600},
-  … (ommited) …
-  {:ini_str=>"2063-04-29 03:00:00 UTC", :fin_str=>"2063-09-02 04:00:00 UTC", :off_str=>"+01:00:00", :ini=>2945041200, :fin=>2955931200, :off=>3600},
-  {:ini_str=>"2064-04-27 03:00:00 UTC", :fin_str=>"∞", :off_str=>"+01:00:00", :ini=>2976490800, :fin=>Infinity, :off=>3600} ]
+# [{:ini_str=>"2015-04-26 03:00:00 UTC", :fin_str=>"2015-09-06 04:00:00 UTC", :off_str=>"+01:00:00", :ini=>1430017200, :fin=>1441512000, :off=>3600},
+#  {:ini_str=>"2016-04-24 03:00:00 UTC", :fin_str=>"2016-09-04 04:00:00 UTC", :off_str=>"+01:00:00", :ini=>1461466800, :fin=>1472961600, :off=>3600},
+#  … (ommited) …
+#  {:ini_str=>"2063-04-29 03:00:00 UTC", :fin_str=>"2063-09-02 04:00:00 UTC", :off_str=>"+01:00:00", :ini=>2945041200, :fin=>2955931200, :off=>3600},
+#  {:ini_str=>"2064-04-27 03:00:00 UTC", :fin_str=>"∞", :off_str=>"+01:00:00", :ini=>2976490800, :fin=>Infinity, :off=>3600} ]
 ```
 
 The resulting changes is an array of objects, where:
 - `ini`, `fin` are unix timestamps or `-Float::INFINITY`, `Float::INFINITY`.
 - `off` is seconds to add, or substract if negative.
-- `ini_fin`, `fin_str`, `off_str` are strings with the same meaning.
-
+- `ini_fin`, `fin_str` are the same ini, fin as UTC strings date, or `-∞`, `∞`.
+- `off_str` is the same off as string.
 
 The same changes in a table:
 
@@ -110,7 +110,7 @@ require 'a0-tzmigration-ruby'
 version_a = A0::TZMigration::TZVersion.new('America/Santiago', '2015a')
 version_b = A0::TZMigration::TZVersion.new('America/Punta_Arenas', '2017a')
 
-puts version_a.changes(version_b)
+version_a.changes(version_b)
 # => [{:ini_str=>"-∞", :fin_str=>"1890-01-01 04:43:40 UTC", :off_str=>"-00:00:54", :ini=>-Infinity, :fin=>-2524504580, :off=>-54},
 #     {:ini_str=>"1910-01-01 04:42:46 UTC", :fin_str=>"1910-01-10 04:42:46 UTC", :off_str=>"+00:17:14", :ini=>-1893439034, :fin=>-1892661434, :off=>1034},
 #     {:ini_str=>"1918-09-01 04:42:46 UTC", :fin_str=>"1918-09-10 04:42:46 UTC", :off_str=>"-00:42:46", :ini=>-1619983034, :fin=>-1619205434, :off=>-2566},
@@ -138,7 +138,6 @@ A0::TZMigration::TZVersion.versions
 # => { "2013c" =>
 #      { "released_at" => "2013-04-19 16:17:40 -0700",
 #        "timezones" => [ "Africa/Abidjan", "Africa/Accra", "Africa/Addis_Ababa", "Africa/Algiers", "Africa/Asmara", …
-
 ```
 
 ### How it works
@@ -150,3 +149,202 @@ Your system needs to have access to the internet in order to download that file.
 When you call `version_a.changes(version_b)`, it will compare the transitions of both versions and returns an array of changes.
 
 The indexes are never cached in `TZVersion.timezones` or `TZVersion.versions`, but you may have a proxy.
+
+## Configuration
+
+### base_url
+
+- default: `'https://a0.github.io/a0-tzmigration-ruby/data/'`
+
+The URL from where files of the tzdb version repository will be downloaded. It must end with a `/`.  
+
+```ruby
+A0::TZMigration.configure do |config|
+  config.base_url = 'https://127.0.0.1/my/repo/'
+end
+
+version = A0::TZMigration::TZVersion.new('America/Santiago', '2018e')
+version.data # will fetch 'https://127.0.0.1/my/repo/timezones/America/Santiago.json'
+```
+
+## TZVersion instance methods
+
+### initialize(name, version)
+
+- parameters:
+  - **name**: the name of the timezone, like `'America/Santiago'`
+  - **version**: the version of the tzdb release, like `'2018e'`
+
+Creates a new TZVersion, for the given name and version.
+
+```ruby
+version = A0::TZMigration::TZVersion.new('America/Santiago', '2018e')
+```
+
+### data
+
+- returns: `Hash`
+- cached: yes
+
+Returns and caches the contents of the [Repository JSON file](../../../data/#the-timezones-json-structure), as read from the internet.
+
+```ruby
+version = A0::TZMigration::TZVersion.new('America/Santiago', '2018e')
+version.data
+# => {"name"=>"America/Santiago", "versions"=>{"2013c"=>{"tag"=>"v1.2013.3", "released_at"=>"2013-04-19 16:17:40 -0700", "transitions"=>[{"utc_offset"=>-16966, "utc_prev_offset"=>-16966, "utc_timestamp"=>-2524504634, "utc_time"=>"1890-01-01T04:42:46+00:00", "local_ini_str"=>"1890-01-01 00:00:00 LMT", "local_fin_str"=>"1890-01-01 00:00:00 SMT"}, …
+```
+
+### version_data
+
+- returns: `Hash`
+- cached: yes
+- throws: `RuntimeError` if the version was not found in the data.
+
+Returns and caches the corresponding value to the versions dictionary from the current data.
+
+If this version is an alias to another timezone, that timezone is fetched and the version_data of that timezone is returned.
+
+```ruby
+version = A0::TZMigration::TZVersion.new('America/Santiago', '2018e')
+version.version_data
+# => {"tag"=>"v1.2018.5", "released_at"=>"2018-05-01 23:42:51 -0700", "transitions"=>[{"utc_offset"=>-16966, "utc_prev_offset"=>-16966, "utc_timestamp"=>-2524504634, "utc_time"=>"1890-01-01T04:42:46+00:00", "local_ini_str"=>"1890-01-01 00:00:00 LMT", "local_fin_str"=>"1890-01-01 00:00:00 SMT"}, {"utc_offset"=>-18000, "utc_prev_offset"=>-16966, "utc_timestamp"=>-1892661434, "utc_time"=>"1910-01-10T04:42:46+00:00", "local_ini_str"=>"1910-01-10 00:00:00 SMT", "local_fin_str"=>"1910-01-09 23:42:46 -05"}, …
+```
+
+### released_at
+
+- returns: `String`
+- cached: yes
+
+Returns and caches the corresponding released_at from the current version_data.
+
+```ruby
+version = A0::TZMigration::TZVersion.new('America/Santiago', '2018e')
+version.released_at
+# => 2018-05-01 23:42:51 -0700
+```
+
+### transitions
+
+- returns: `Array`
+- cached: yes
+
+Returns and caches the corresponding [transitions](../../../data/#transitions) from the current version_data.
+
+```ruby
+version = A0::TZMigration::TZVersion.new('America/Santiago', '2018e')
+version.transitions
+# => 
+# [{"utc_offset"=>-16966, "utc_prev_offset"=>-16966, "utc_timestamp"=>-2524504634, "utc_time"=>"1890-01-01T04:42:46+00:00", "local_ini_str"=>"1890-01-01 00:00:00 LMT", "local_fin_str"=>"1890-01-01 00:00:00 SMT"}
+#  {"utc_offset"=>-18000, "utc_prev_offset"=>-16966, "utc_timestamp"=>-1892661434, "utc_time"=>"1910-01-10T04:42:46+00:00", "local_ini_str"=>"1910-01-10 00:00:00 SMT", "local_fin_str"=>"1910-01-09 23:42:46 -05"}
+#  …
+#  {"utc_offset"=>-10800, "utc_prev_offset"=>-14400, "utc_timestamp"=>3080520000, "utc_time"=>"2067-08-14T04:00:00+00:00", "local_ini_str"=>"2067-08-14 00:00:00 -04", "local_fin_str"=>"2067-08-14 01:00:00 -03"}
+#  {"utc_offset"=>-14400, "utc_prev_offset"=>-10800, "utc_timestamp"=>3104103600, "utc_time"=>"2068-05-13T03:00:00+00:00", "local_ini_str"=>"2068-05-13 00:00:00 -03", "local_fin_str"=>"2068-05-12 23:00:00 -04"} ]
+```
+
+The transitions are sorted.
+
+### transition_ranges
+
+- returns: `Array`
+- cached: yes
+
+Returns and caches a generated transition ranges from the current version_data.
+
+A transition range represents a continuos time where this timezone has the same offset from UTC. Is an array of dictionaries with the following keys:
+
+- `ini` is the starting time (inclusive) as a unix timestamp or `-Float::INFINITY`.
+- `fin` is the ending time (exclusive) as a unix timestamps or `Float::INFINITY`.
+- `off` is the number of seconds offset from UTC.
+- `ini_fin`, `fin_str` are the same ini, fin as UTC strings date, or `-∞`, `∞`.
+- `off_str` is the same off as a string.
+
+```ruby
+version = A0::TZMigration::TZVersion.new('America/Santiago', '2018e')
+version.transition_ranges
+# => 
+# [{:ini_str=>"-∞", :fin_str=>"1890-01-01 04:42:46 UTC", :off_str=>"-04:42:46", :ini=>-Infinity, :fin=>-2524504634, :off=>-16966},
+#  {:ini_str=>"1890-01-01 04:42:46 UTC", :fin_str=>"1910-01-10 04:42:46 UTC", :off_str=>"-04:42:46", :ini=>-2524504634, :fin=>-1892661434, :off=>-16966},
+#  …
+#  {:ini_str=>"2067-08-14 04:00:00 UTC", :fin_str=>"2068-05-13 03:00:00 UTC", :off_str=>"-03:00:00", :ini=>3080520000, :fin=>3104103600, :off=>-10800},
+#  {:ini_str=>"2068-05-13 03:00:00 UTC", :fin_str=>"∞", :off_str=>"-04:00:00", :ini=>3104103600, :fin=>Infinity, :off=>-14400} ]
+```
+
+The transition ranges are sorted.
+
+### timestamps
+
+- returns: `Array`
+- cached: yes
+
+Returns and caches the list of timestamps at which transitions start/end, adding `-Float::INFINITY` at the beginning and `Float::INFINITY` at the end.
+
+```ruby
+version = A0::TZMigration::TZVersion.new('America/Santiago', '2018e')
+version.timestamps
+# => 
+# [-Infinity,
+#  -2524504634,
+#  …
+#  3104103600,
+#  Infinity]
+```
+
+The timestamps are sorted.
+
+### changes
+
+- parameters:
+  - **other**: another TZVersion instance.
+- returns: `Array`
+- cached: no
+
+Calculates the changes between this version an the other version, based on the transition_ranges of each one.
+
+```ruby
+require 'a0-tzmigration-ruby'
+
+version_a = A0::TZMigration::TZVersion.new('America/Santiago', '2018e')
+version_b = A0::TZMigration::TZVersion.new('America/Punta_Arenas', '2018e')
+
+version_a.changes(version_b)
+# =>
+# [{:ini_str=>"-∞", :fin_str=>"1890-01-01 04:43:40 UTC", :off_str=>"-00:00:54", :ini=>-Infinity, :fin=>-2524504580, :off=>-54},
+#  {:ini_str=>"1946-07-15 04:00:00 UTC", :fin_str=>"1946-09-01 03:00:00 UTC", :off_str=>"-01:00:00", :ini=>-740520000, :fin=>-736376400, :off=>-3600},
+#  … (ommited) …
+#  {:ini_str=>"2067-05-15 03:00:00 UTC", :fin_str=>"2067-08-14 04:00:00 UTC", :off_str=>"+01:00:00", :ini=>3072654000, :fin=>3080520000, :off=>3600},
+#  {:ini_str=>"2068-05-13 03:00:00 UTC", :fin_str=>"∞", :off_str=>"+01:00:00", :ini=>3104103600, :fin=>Infinity, :off=>3600}]
+```
+
+The changes are sorted.
+
+## TZVersion static methods
+
+### versions
+
+- returns: `Hash`
+- cached: no
+
+Returns the contents of the [versions index](../../../data/#the-versions-index-json-structure), as read from the internet.
+
+```ruby
+A0::TZMigration::TZVersion.versions()
+# =>
+# {"2013c"=>
+#   {"released_at"=>"2013-04-19 16:17:40 -0700",
+#    "timezones"=> ["Africa/Abidjan", "Africa/Accra", "Africa/Addis_Ababa", "Africa/Algiers", "Africa/Asmara", …
+```
+
+### timezones
+
+- returns: `Hash`
+- cached: no
+
+Returns the contents of the [timezones index](../../../data/#the-timezones-index-json-structure), as read from the internet.
+
+```ruby
+A0::TZMigration::TZVersion.timezones()
+# =>
+# {"Africa/Abidjan"=>
+#   {"versions"=>
+#     ["2013c", "2013d", "2013e", "2013f", "2013g", "2013h", …
+```

@@ -124,7 +124,7 @@ Never asume an alias is permanent, ie: always look in the version_data object to
 When you call `tzversion.version_data()` on an instance, it will automatically download the linked zone for you, so it returns the version_data corresponding to the aliased zone.
 
 
-## The Timezone INDEX JSON structure
+## The Timezones index JSON structure
 
 You can programatically fetch the current known time zones with the following example code:
 
@@ -160,3 +160,45 @@ The dictionary with the current timezones availables, each key is the name of th
 - Type: `array`
 
 An array which contains all currently known tzdb versions available for this timezone.
+
+## The Versions index JSON structure
+
+You can programatically fetch the current known versions with the following example code:
+
+```ruby
+versions = A0::TZMigration::TZVersion.versions()
+puts versions
+```
+
+This will start a download for the following url: \
+[https://a0.github.io/a0-tzmigration-ruby/data/versions/00-index.json](https://a0.github.io/a0-tzmigration-ruby/data/versions/00-index.json)
+
+This file is never cached, so you always get a fresh version from the repository. The contents of the `versions/00-index.json` file look something like this:
+
+```json
+ { "versions": {
+     "2013c": { 
+       "released_at": "2013-04-19 16:17:40 -0700",
+       "timezones": [ "Africa/Abidjan","Africa/Accra","Africa/Addis_Ababa","Africa/Algiers", …
+}
+```
+
+This is useful to known wether a new version is available at the repo.
+
+### versions
+
+- Type: `dictionary`
+
+The dictionary with the current versions availables, each key is the name of the version.
+
+### released_at
+
+- Type: `date string`
+
+The Official tzdb date release of this version which is extracted from the [NEWS file](https://github.com/tzinfo/tzinfo-data/blob/v1.2016.4/data/NEWS#L817), for example `"2014-08-05 17:42:36 -0700"`.
+
+### timezones
+
+- Type: `array`
+
+An array which contains all currently known timezones available for this version.
