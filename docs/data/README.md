@@ -69,7 +69,7 @@ A dictionary of known versions available for this timezone, where the key is the
 
 The git tag from the tzinfo-data gem where this version data came from, for example [v1.2014.6](https://github.com/tzinfo/tzinfo-data/tree/v1.2014.6/data).
 
-### released_at
+### released\_at
 
 - Type: `date string`
 
@@ -81,19 +81,19 @@ The Official tzdb date release of this version which is extracted from the [NEWS
 
 An ordered list of transitions. Each transition represents a switch of local clocks in this timezone.
 
-### utc_time
+### utc\_time
 
 - Type: `iso 8610 date string`
 
 The time at which this transitions occurrs.
 
-### utc_timestamp
+### utc\_timestamp
 
 - Type: `number`
 
 The same time as above at which this transitions occurs, but as an UNIX timestamp, ie: seconds since the epoch *ignoring* leap seconds.
 
-### local_ini_str, local_fin_str
+### local\_ini\_str, local\_fin\_str
 
 - Type: `local time, varies`
 
@@ -101,13 +101,13 @@ The local time at which this transitions occurs. For ex: `"1912-01-01 00:00:00 L
 
 LMT usually means *Local Mean Time*. Other abreviations like WAT, PET, CLT, etc are no longer used anymore in recent tzdb releases, so use this fields for informational purposes only.
 
-### utc_offset
+### utc\_offset
 
 - Type: `number`
 
 The number of seconds the local time differs from UTC when this transition occurs. For ex: -3600 means UTC-01.
 
-### utc_prev_offset
+### utc\_prev\_offset
 
 - Type: `number`
 
@@ -191,7 +191,7 @@ This is useful to known wether a new version is available at the repo.
 
 The dictionary with the current versions availables, each key is the name of the version.
 
-### released_at
+### released\_at
 
 - Type: `date string`
 
